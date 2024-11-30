@@ -215,7 +215,12 @@ class SheetsManager {
             await this.ensureAuthenticated();
 
             // Formater la date pour Google Sheets
-            const dateFormatted = new Date(date).toLocaleDateString('fr-FR');
+            const dateObj = new Date(date);
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const year = dateObj.getFullYear();
+            const dateFormatted = `${day}/${month}/${year}`;
+            
             const values = [[dateFormatted, kilometrage]];
             
             console.log('Envoi des données:', { dateFormatted, kilometrage });
