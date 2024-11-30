@@ -5,19 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suivi Kilométrage</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container mt-4">
-        <h1 class="text-center mb-4">Suivi Kilométrage</h1>
-        <!-- Sélecteur de période -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-speedometer2 me-2"></i>
+                Suivi Kilométrage
+            </a>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- En-tête avec objectifs -->
         <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title">Période de suivi</h5>
-                <div class="d-flex justify-content-between align-items-center">
-                    <button class="btn btn-outline-primary" id="prevMonth">&lt; Mois précédent</button>
-                    <div class="d-flex align-items-center">
-                        <select class="form-select mx-2" id="monthSelector" style="max-width: 300px;">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="card-title mb-2">Suivi du kilométrage</h2>
+                        <p class="text-secondary mb-1">
+                            <i class="bi bi-calendar-event me-2"></i>
+                            Période : 28 novembre 2024 - 28 novembre 2025
+                        </p>
+                        <p class="text-secondary mb-0">
+                            <i class="bi bi-flag me-2"></i>
+                            Objectif annuel : 20 000 km (1 666,66 km/mois)
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <select class="form-select mb-2" id="monthSelector">
                             <option value="2024-11">Novembre 2024</option>
                             <option value="2024-12">Décembre 2024</option>
                             <option value="2025-01">Janvier 2025</option>
@@ -32,86 +53,123 @@
                             <option value="2025-10">Octobre 2025</option>
                             <option value="2025-11">Novembre 2025</option>
                         </select>
-                        <button class="btn btn-outline-success ms-2" id="viewYearButton">À l'année</button>
+                        <div class="btn-group w-100">
+                            <button class="btn btn-outline-primary" id="prevMonth">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <button class="btn btn-outline-success" id="viewYearButton">Vue annuelle</button>
+                            <button class="btn btn-outline-primary" id="nextMonth">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
                     </div>
-                    <button class="btn btn-outline-primary" id="nextMonth">Mois suivant &gt;</button>
                 </div>
             </div>
         </div>
-        
-        <!-- Carte principale -->
+
+        <!-- Progression -->
         <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title">Progression Mensuelle</h5>
+                <h5 class="card-title d-flex justify-content-between align-items-center">
+                    Progression Mensuelle
+                    <span class="badge bg-primary" id="kilometrageInfo">
+                        <span id="currentKm">0</span> / 1666.66 km
+                    </span>
+                </h5>
                 <div class="progress mb-3">
-                    <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
-                </div>
-                <div id="kilometrageInfo" class="text-center mb-3">
-                    <span id="currentKm">0</span> / 1666.66 km
+                    <div id="progressBar" class="progress-bar" role="progressbar"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Formulaire de saisie -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Nouveau relevé</h5>
-                <div id="messageConfirmation" class="alert alert-success" style="display: none;">
-                    Relevé enregistré avec succès !
+        <div class="row">
+            <!-- Formulaire de saisie -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Nouveau relevé</h5>
+                        <div id="messageConfirmation" class="alert alert-success" style="display: none;">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Relevé enregistré avec succès !
+                        </div>
+                        <form id="kmForm">
+                            <div class="mb-3">
+                                <label for="kmInput" class="form-label">Kilométrage actuel</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="kmInput" required>
+                                    <span class="input-group-text">km</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="dateInput" class="form-label">Date du relevé</label>
+                                <input type="date" class="form-control" id="dateInput" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Enregistrer
+                            </button>
+                        </form>
+                    </div>
                 </div>
-                <form id="kmForm">
-                    <div class="mb-3">
-                        <label for="kmInput" class="form-label">Kilométrage actuel</label>
-                        <input type="number" class="form-control" id="kmInput" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="dateInput" class="form-label">Date du relevé</label>
-                        <input type="date" class="form-control" id="dateInput" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
             </div>
-        </div>
 
-        <!-- Graphique -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Évolution du kilométrage</h5>
-                <canvas id="kmChart"></canvas>
+            <!-- Graphique -->
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Évolution du kilométrage</h5>
+                        <div class="chart-container">
+                            <canvas id="kmChart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Statistiques -->
-        <div class="card mb-4">
+        <div class="card">
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="card-title mb-0">Statistiques</h5>
-                    <button id="resetButton" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmationModal">
-                        <i class="bi bi-trash"></i> Réinitialiser le mois
+                    <button id="resetButton" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#confirmationModal">
+                        <i class="bi bi-trash me-2"></i>
+                        Réinitialiser le mois
                     </button>
                 </div>
-                <div class="row">
+                <div class="row g-3">
                     <div class="col-md-3">
                         <div class="stat-item">
-                            <h6>Moyenne journalière</h6>
+                            <h6>
+                                <i class="bi bi-speedometer me-2"></i>
+                                Moyenne journalière
+                            </h6>
                             <p id="moyenneJour">0 km/jour</p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="stat-item">
-                            <h6>Prévision fin du mois</h6>
+                            <h6>
+                                <i class="bi bi-calendar-check me-2"></i>
+                                Prévision fin du mois
+                            </h6>
                             <p id="previsionMois">0 km</p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="stat-item">
-                            <h6>Projection annuelle</h6>
+                            <h6>
+                                <i class="bi bi-graph-up me-2"></i>
+                                Projection annuelle
+                            </h6>
                             <p id="projectionAnnuelle">0 km</p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="stat-item">
-                            <h6>Statut</h6>
+                            <h6>
+                                <i class="bi bi-check-circle me-2"></i>
+                                Statut
+                            </h6>
                             <p id="statut">Dans les objectifs</p>
                         </div>
                     </div>
@@ -121,19 +179,28 @@
     </div>
 
     <!-- Modal de confirmation -->
-    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal fade" id="confirmationModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Confirmation
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="confirmationModalBody">
                     Êtes-vous sûr de vouloir réinitialiser tous les relevés de ce mois ?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-danger" id="confirmReset">Réinitialiser</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x me-2"></i>
+                        Annuler
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmReset">
+                        <i class="bi bi-trash me-2"></i>
+                        Réinitialiser
+                    </button>
                 </div>
             </div>
         </div>
