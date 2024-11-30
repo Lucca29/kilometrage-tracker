@@ -2,7 +2,7 @@
 const OBJECTIF_ANNUEL = 20000;
 const OBJECTIF_MENSUEL = OBJECTIF_ANNUEL / 12; // 1666.66 km par mois
 const STORAGE_KEY = 'kilometrage_releves';
-const DATE_DEBUT = new Date('2024-11-27');
+const DATE_DEBUT = new Date('2024-11-28');
 const DATE_FIN = new Date('2025-11-28');
 
 // Variables globales
@@ -17,8 +17,16 @@ let vueAnnuelle = false;
 const sheetsManager = new SheetsManager();
 
 // Initialisation
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log('Application démarrée');
+    
+    // Initialiser Google Sheets
+    try {
+        await sheetsManager.init();
+        console.log('Google Sheets initialisé');
+    } catch (error) {
+        console.error('Erreur d\'initialisation Google Sheets:', error);
+    }
     
     // Charger les données sauvegardées
     chargerDonnees();
@@ -201,44 +209,57 @@ async function ajouterReleve() {
     const dateInput = document.getElementById('dateInput');
     
     const kilometrage = parseFloat(kmInput.value);
-    const date = dateInput.value;
+    const dateStr = dateInput.value;
     
-    if (isNaN(kilometrage) || !date) {
+    if (isNaN(kilometrage) || !dateStr) {
         alert('Veuillez remplir tous les champs correctement');
         return;
     }
     
-    // Ajouter le relevé à la liste
-    const releve = {
-        date: date,
-        kilometrage: kilometrage
-    };
-    
-    releves.push(releve);
-    
-    // Trier les relevés par date
-    releves.sort((a, b) => new Date(a.date) - new Date(b.date));
-    
-    // Sauvegarder les données localement
-    sauvegarderDonnees();
-    
     try {
+        // Créer un objet Date à partir de la chaîne de date
+        const date = new Date(dateStr);
+        
+        // Vérifier si la date est valide
+        if (isNaN(date.getTime())) {
+            throw new Error('Date invalide');
+        }
+        
+        // Ajouter le relevé à la liste
+        const releve = {
+            date: date,
+            kilometrage: kilometrage
+        };
+        
+        releves.push(releve);
+        
+        // Trier les relevés par date
+        releves.sort((a, b) => a.date - b.date);
+        
+        // Sauvegarder les données localement
+        sauvegarderDonnees();
+        
         // Synchroniser avec Google Sheets
-        await sheetsManager.appendKilometrageData(date, kilometrage);
-        console.log('Données synchronisées avec Google Sheets');
-        
-        // Réinitialiser les champs
-        kmInput.value = '';
-        dateInput.value = '';
-        
-        // Mettre à jour l'interface
-        mettreAJourInterface();
-        
-        // Afficher un message de succès
-        afficherMessage('Relevé ajouté et synchronisé avec succès !', 'success');
+        await sheetsManager.appendKilometrageData(dateStr, kilometrage)
+            .then(() => {
+                console.log('Données synchronisées avec Google Sheets');
+                // Réinitialiser les champs
+                kmInput.value = '';
+                dateInput.value = '';
+                // Mettre à jour l'interface
+                mettreAJourInterface();
+                // Afficher un message de succès
+                afficherMessage('Relevé ajouté et synchronisé avec succès !', 'success');
+            })
+            .catch(error => {
+                console.error('Erreur lors de la synchronisation:', error);
+                afficherMessage('Relevé sauvegardé localement mais erreur de synchronisation', 'warning');
+                // Mettre quand même à jour l'interface
+                mettreAJourInterface();
+            });
     } catch (error) {
-        console.error('Erreur lors de la synchronisation:', error);
-        afficherMessage('Relevé sauvegardé localement mais erreur de synchronisation', 'warning');
+        console.error('Erreur:', error);
+        afficherMessage('Erreur lors de l\'ajout du relevé: ' + error.message, 'danger');
     }
 }
 

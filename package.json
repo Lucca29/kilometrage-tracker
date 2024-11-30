@@ -1,0 +1,12 @@
+{
+  "name": "kilometrage-tracker",
+  "version": "1.0.0",
+  "description": "Application de suivi kilométrique",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
