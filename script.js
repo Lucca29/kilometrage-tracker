@@ -39,8 +39,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Ajouter l'écouteur d'événements pour le bouton de réinitialisation
-    document.getElementById('resetButton').addEventListener('click', reinitialiserMoisCourant);
-    
+    document.getElementById('resetButton').addEventListener('click', () => {
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmationModal'));
+        modal.show();
+    });
+
+    // Ajouter l'écouteur d'événements pour la confirmation de réinitialisation
+    document.getElementById('confirmReset').addEventListener('click', () => {
+        // Filtrer les relevés pour garder uniquement ceux des autres mois
+        releves = releves.filter(releve => {
+            const moisReleve = `${releve.date.getFullYear()}-${(releve.date.getMonth() + 1).toString().padStart(2, '0')}`;
+            return moisReleve !== moisSelectionne;
+        });
+
+        // Sauvegarder les données mises à jour
+        sauvegarderDonnees();
+
+        // Mettre à jour l'interface
+        mettreAJourInterface();
+
+        // Fermer le modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+        modal.hide();
+
+        // Afficher un message de confirmation
+        const messageConfirmation = document.getElementById('messageConfirmation');
+        messageConfirmation.textContent = `Les relevés du mois ${moisSelectionne} ont été réinitialisés.`;
+        messageConfirmation.style.display = 'block';
+        setTimeout(() => {
+            messageConfirmation.style.display = 'none';
+        }, 3000);
+    });
+
     // Ajouter l'écouteur d'événements pour le bouton de vue annuelle
     document.getElementById('viewYearButton').addEventListener('click', basculerVueAnnuelle);
 
@@ -530,29 +560,9 @@ function mettreAJourInterface() {
 
 // Fonction pour réinitialiser le mois courant
 function reinitialiserMoisCourant() {
-    if (!confirm(`Êtes-vous sûr de vouloir réinitialiser tous les relevés du mois ${moisSelectionne} ?\nCette action est irréversible.`)) {
-        return;
-    }
-
-    // Filtrer les relevés pour garder uniquement ceux des autres mois
-    releves = releves.filter(releve => {
-        const moisReleve = `${releve.date.getFullYear()}-${(releve.date.getMonth() + 1).toString().padStart(2, '0')}`;
-        return moisReleve !== moisSelectionne;
-    });
-
-    // Sauvegarder les données mises à jour
-    sauvegarderDonnees();
-
-    // Mettre à jour l'interface
-    mettreAJourInterface();
-
-    // Afficher un message de confirmation
-    const messageConfirmation = document.getElementById('messageConfirmation');
-    messageConfirmation.textContent = `Les relevés du mois ${moisSelectionne} ont été réinitialisés.`;
-    messageConfirmation.style.display = 'block';
-    setTimeout(() => {
-        messageConfirmation.style.display = 'none';
-    }, 3000);
+    // Mettre à jour le texte du modal avec le mois sélectionné
+    document.getElementById('confirmationModalBody').textContent = 
+        `Êtes-vous sûr de vouloir réinitialiser tous les relevés du mois ${moisSelectionne} ?\nCette action est irréversible.`;
 }
 
 // Fonction pour réinitialiser les données

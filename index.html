@@ -11,33 +11,33 @@
     <div class="container mt-4">
         <h1 class="text-center mb-4">Suivi Kilométrage</h1>
         <!-- Sélecteur de période -->
-<div class="card mb-4">
-    <div class="card-body">
-        <h5 class="card-title">Période de suivi</h5>
-        <div class="d-flex justify-content-between align-items-center">
-            <button class="btn btn-outline-primary" id="prevMonth">&lt; Mois précédent</button>
-            <div class="d-flex align-items-center">
-                <select class="form-select mx-2" id="monthSelector" style="max-width: 300px;">
-                    <option value="2024-11">Novembre 2024</option>
-                    <option value="2024-12">Décembre 2024</option>
-                    <option value="2025-01">Janvier 2025</option>
-                    <option value="2025-02">Février 2025</option>
-                    <option value="2025-03">Mars 2025</option>
-                    <option value="2025-04">Avril 2025</option>
-                    <option value="2025-05">Mai 2025</option>
-                    <option value="2025-06">Juin 2025</option>
-                    <option value="2025-07">Juillet 2025</option>
-                    <option value="2025-08">Août 2025</option>
-                    <option value="2025-09">Septembre 2025</option>
-                    <option value="2025-10">Octobre 2025</option>
-                    <option value="2025-11">Novembre 2025</option>
-                </select>
-                <button class="btn btn-outline-success ms-2" id="viewYearButton">À l'année</button>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Période de suivi</h5>
+                <div class="d-flex justify-content-between align-items-center">
+                    <button class="btn btn-outline-primary" id="prevMonth">&lt; Mois précédent</button>
+                    <div class="d-flex align-items-center">
+                        <select class="form-select mx-2" id="monthSelector" style="max-width: 300px;">
+                            <option value="2024-11">Novembre 2024</option>
+                            <option value="2024-12">Décembre 2024</option>
+                            <option value="2025-01">Janvier 2025</option>
+                            <option value="2025-02">Février 2025</option>
+                            <option value="2025-03">Mars 2025</option>
+                            <option value="2025-04">Avril 2025</option>
+                            <option value="2025-05">Mai 2025</option>
+                            <option value="2025-06">Juin 2025</option>
+                            <option value="2025-07">Juillet 2025</option>
+                            <option value="2025-08">Août 2025</option>
+                            <option value="2025-09">Septembre 2025</option>
+                            <option value="2025-10">Octobre 2025</option>
+                            <option value="2025-11">Novembre 2025</option>
+                        </select>
+                        <button class="btn btn-outline-success ms-2" id="viewYearButton">À l'année</button>
+                    </div>
+                    <button class="btn btn-outline-primary" id="nextMonth">Mois suivant &gt;</button>
+                </div>
             </div>
-            <button class="btn btn-outline-primary" id="nextMonth">Mois suivant &gt;</button>
         </div>
-    </div>
-</div>
         
         <!-- Carte principale -->
         <div class="card mb-4">
@@ -86,7 +86,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="card-title mb-0">Statistiques</h5>
-                    <button id="resetButton" class="btn btn-outline-danger btn-sm">
+                    <button id="resetButton" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmationModal">
                         <i class="bi bi-trash"></i> Réinitialiser le mois
                     </button>
                 </div>
@@ -115,6 +115,25 @@
                             <p id="statut">Dans les objectifs</p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="confirmationModalBody">
+                    Êtes-vous sûr de vouloir réinitialiser tous les relevés de ce mois ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger" id="confirmReset">Réinitialiser</button>
                 </div>
             </div>
         </div>
