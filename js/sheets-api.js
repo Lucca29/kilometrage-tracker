@@ -7,37 +7,106 @@ const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
 class SheetsManager {
     constructor() {
+        // Configuration de l'API Google
         this.CLIENT_ID = '843479043399-21s3fodbqe5npek3ist8ef1lmo7cmo2v.apps.googleusercontent.com';
         this.API_KEY = 'AIzaSyAb6ienYvLlVz6UxxmIaiuNt4HdkUCDVSI';
         this.SPREADSHEET_ID = '1WHMvUFZo-ATU-qN9CUwDTPKil9pP5qyqXvdQSKFlgQo';
-        this.SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+        this.SCOPES = [
+            'https://www.googleapis.com/auth/spreadsheets',
+            'https://www.googleapis.com/auth/drive.file'
+        ];
+        
+        // État de l'authentification
         this.tokenClient = null;
         this.gapiInited = false;
         this.gisInited = false;
         this.isAuthenticated = false;
+        
+        // Initialiser les écouteurs d'erreurs
+        window.addEventListener('error', this.handleError.bind(this));
+        window.addEventListener('unhandledrejection', this.handlePromiseError.bind(this));
+    }
+
+    handleError(event) {
+        console.error('Erreur détectée:', event.error);
+        if (event.error && event.error.status === 401) {
+            this.handleAuthError();
+        }
+    }
+
+    handlePromiseError(event) {
+        console.error('Promesse rejetée:', event.reason);
+        if (event.reason && event.reason.status === 401) {
+            this.handleAuthError();
+        }
+    }
+
+    handleAuthError() {
+        console.log('Erreur d\'authentification détectée, tentative de reconnexion...');
+        this.isAuthenticated = false;
+        localStorage.removeItem('gapi_token');
+        this.initAuth();
     }
 
     async init() {
         try {
+            console.log('Initialisation de Google Sheets API...');
             await this.loadGapiScript();
             await this.loadGisScript();
             await this.initializeGapiClient();
             await this.initializeGisClient();
-            
-            // Vérifier le token stocké
-            const storedToken = localStorage.getItem('gapi_token');
-            if (storedToken) {
-                const tokenData = JSON.parse(storedToken);
-                if (this.isTokenValid(tokenData)) {
-                    this.isAuthenticated = true;
-                    gapi.client.setToken(tokenData);
-                    return;
-                }
-            }
+            await this.initAuth();
+            console.log('Initialisation terminée avec succès');
         } catch (error) {
             console.error('Erreur lors de l\'initialisation:', error);
             throw error;
         }
+    }
+
+    async initAuth() {
+        const storedToken = localStorage.getItem('gapi_token');
+        if (storedToken) {
+            try {
+                const tokenData = JSON.parse(storedToken);
+                if (this.isTokenValid(tokenData)) {
+                    console.log('Token valide trouvé');
+                    this.isAuthenticated = true;
+                    gapi.client.setToken(tokenData);
+                    return;
+                }
+            } catch (error) {
+                console.warn('Token invalide:', error);
+                localStorage.removeItem('gapi_token');
+            }
+        }
+        
+        console.log('Pas de token valide, nouvelle authentification nécessaire');
+        await this.requestAuth();
+    }
+
+    async requestAuth() {
+        return new Promise((resolve, reject) => {
+            try {
+                this.tokenClient.callback = (response) => {
+                    if (response.error) {
+                        reject(response);
+                        return;
+                    }
+                    console.log('Nouvelle authentification réussie');
+                    this.isAuthenticated = true;
+                    const tokenData = {
+                        ...response,
+                        expires_at: Date.now() + (response.expires_in * 1000)
+                    };
+                    localStorage.setItem('gapi_token', JSON.stringify(tokenData));
+                    resolve();
+                };
+                this.tokenClient.requestAccessToken({ prompt: 'consent' });
+            } catch (error) {
+                console.error('Erreur lors de la demande d\'authentification:', error);
+                reject(error);
+            }
+        });
     }
 
     loadGapiScript() {
@@ -64,7 +133,8 @@ class SheetsManager {
         if (!tokenData || !tokenData.access_token || !tokenData.expires_at) {
             return false;
         }
-        return new Date(tokenData.expires_at).getTime() > Date.now() + (5 * 60 * 1000);
+        // Ajouter une marge de 5 minutes
+        return new Date(tokenData.expires_at).getTime() > (Date.now() + (5 * 60 * 1000));
     }
 
     async initializeGapiClient() {
@@ -78,54 +148,23 @@ class SheetsManager {
         });
 
         this.gapiInited = true;
+        console.log('GAPI initialisé');
     }
 
     async initializeGisClient() {
-        return new Promise((resolve) => {
-            this.tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: this.CLIENT_ID,
-                scope: this.SCOPES,
-                callback: (response) => {
-                    if (response.error) {
-                        console.error('Erreur de token:', response);
-                        return;
-                    }
-                    this.isAuthenticated = true;
-                    const tokenData = {
-                        ...response,
-                        expires_at: Date.now() + (response.expires_in * 1000)
-                    };
-                    localStorage.setItem('gapi_token', JSON.stringify(tokenData));
-                    resolve();
-                },
-            });
-            this.gisInited = true;
-            resolve();
+        this.tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: this.CLIENT_ID,
+            scope: this.SCOPES.join(' '),
+            callback: '', // Défini lors de l'appel
         });
+        this.gisInited = true;
+        console.log('GIS initialisé');
     }
 
     async ensureAuthenticated() {
         if (!this.isAuthenticated) {
-            return new Promise((resolve, reject) => {
-                try {
-                    this.tokenClient.callback = (response) => {
-                        if (response.error) {
-                            reject(response);
-                            return;
-                        }
-                        this.isAuthenticated = true;
-                        const tokenData = {
-                            ...response,
-                            expires_at: Date.now() + (response.expires_in * 1000)
-                        };
-                        localStorage.setItem('gapi_token', JSON.stringify(tokenData));
-                        resolve();
-                    };
-                    this.tokenClient.requestAccessToken({ prompt: '' });
-                } catch (error) {
-                    reject(error);
-                }
-            });
+            console.log('Authentication nécessaire');
+            await this.requestAuth();
         }
     }
 
@@ -133,21 +172,30 @@ class SheetsManager {
         try {
             await this.ensureAuthenticated();
 
-            const values = [[date, kilometrage]];
-            const resource = { values };
+            // Formater la date pour Google Sheets
+            const dateFormatted = new Date(date).toLocaleDateString('fr-FR');
+            const values = [[dateFormatted, kilometrage]];
+            
+            console.log('Ajout des données:', { date: dateFormatted, kilometrage });
             
             const result = await gapi.client.sheets.spreadsheets.values.append({
                 spreadsheetId: this.SPREADSHEET_ID,
                 range: 'Feuille 1!A:B',
                 valueInputOption: 'USER_ENTERED',
-                resource: resource,
+                insertDataOption: 'INSERT_ROWS',
+                resource: { values }
             });
 
-            console.log('Données ajoutées:', result);
+            console.log('Données ajoutées avec succès:', result);
             return result;
-        } catch (err) {
-            console.error('Erreur lors de l\'ajout des données:', err);
-            throw err;
+        } catch (error) {
+            console.error('Erreur lors de l\'ajout des données:', error);
+            if (error.status === 401) {
+                await this.handleAuthError();
+                // Réessayer une fois après la réauthentification
+                return this.appendKilometrageData(date, kilometrage);
+            }
+            throw error;
         }
     }
 
@@ -175,10 +223,11 @@ class SheetsManager {
                 gapi.client.setToken('');
                 localStorage.removeItem('gapi_token');
                 this.isAuthenticated = false;
+                console.log('Déconnexion réussie');
             }
-        } catch (err) {
-            console.error('Erreur de déconnexion:', err);
-            throw err;
+        } catch (error) {
+            console.error('Erreur lors de la déconnexion:', error);
+            throw error;
         }
     }
 }
