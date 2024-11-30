@@ -13,6 +13,9 @@ let totalMoisCourant = 0;
 let moisSelectionne = getMoisCourant();
 let vueAnnuelle = false;
 
+// Initialisation du gestionnaire Google Sheets
+const sheetsManager = new SheetsManager();
+
 // Initialisation
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Application démarrée');
@@ -193,41 +196,68 @@ function sauvegarderDonnees() {
     console.log('Données sauvegardées:', relevesASauvegarder);
 }
 
-function ajouterReleve() {
+async function ajouterReleve() {
     const kmInput = document.getElementById('kmInput');
     const dateInput = document.getElementById('dateInput');
     
     const kilometrage = parseFloat(kmInput.value);
-    const date = new Date(dateInput.value);
+    const date = dateInput.value;
     
-    // Vérifier que la date est dans la plage autorisée
-    if (date < DATE_DEBUT || date > DATE_FIN) {
-        alert('La date doit être comprise entre le 27 novembre 2024 et le 28 novembre 2025');
+    if (isNaN(kilometrage) || !date) {
+        alert('Veuillez remplir tous les champs correctement');
         return;
     }
     
-    // Ajouter le nouveau relevé
-    releves.push({ date, kilometrage });
+    // Ajouter le relevé à la liste
+    const releve = {
+        date: date,
+        kilometrage: kilometrage
+    };
     
-    // Mettre à jour les totaux
-    totalKm += kilometrage;
-    totalMoisCourant = calculerTotalMoisCourant();
+    releves.push(releve);
     
-    // Sauvegarder les données
+    // Trier les relevés par date
+    releves.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    // Sauvegarder les données localement
     sauvegarderDonnees();
     
-    // Mettre à jour l'interface
-    mettreAJourInterface();
+    try {
+        // Synchroniser avec Google Sheets
+        await sheetsManager.appendKilometrageData(date, kilometrage);
+        console.log('Données synchronisées avec Google Sheets');
+        
+        // Réinitialiser les champs
+        kmInput.value = '';
+        dateInput.value = '';
+        
+        // Mettre à jour l'interface
+        mettreAJourInterface();
+        
+        // Afficher un message de succès
+        afficherMessage('Relevé ajouté et synchronisé avec succès !', 'success');
+    } catch (error) {
+        console.error('Erreur lors de la synchronisation:', error);
+        afficherMessage('Relevé sauvegardé localement mais erreur de synchronisation', 'warning');
+    }
+}
+
+function afficherMessage(message, type = 'success') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.role = 'alert';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
     
-    // Réinitialiser le formulaire
-    kmInput.value = '';
+    const container = document.querySelector('.container');
+    container.insertBefore(alertDiv, container.firstChild);
     
-    // Afficher le message de confirmation
-    const messageConfirmation = document.getElementById('messageConfirmation');
-    messageConfirmation.style.display = 'block';
+    // Auto-fermeture après 5 secondes
     setTimeout(() => {
-        messageConfirmation.style.display = 'none';
-    }, 3000);
+        alertDiv.remove();
+    }, 5000);
 }
 
 function initialiserGraphique() {
