@@ -532,7 +532,7 @@ function mettreAJourGraphiqueAnnuel() {
     
     const labels = relevesTries.map(r => r.date.toLocaleDateString());
     
-    // Créer la ligne d'objectif
+    // Créer la ligne d'objectif avec l'objectif mensuel ajusté
     const objectifJournalier = OBJECTIF_ANNUEL / 365;
     const objectifCumule = labels.map((_, index) => objectifJournalier * (index + 1));
     
@@ -547,14 +547,29 @@ function mettreAJourGraphiqueAnnuel() {
 function mettreAJourProgression() {
     const progressBar = document.getElementById('progressBar');
     const currentKm = document.getElementById('currentKm');
+    const progressBarAnnee = document.getElementById('progressBarAnnee');
+    const jourActuel = document.getElementById('jourActuel');
     
-    // Calculer la progression annuelle
+    // Calculer la progression annuelle des kilomètres
     const progressionAnnuelle = (totalKm / OBJECTIF_ANNUEL) * 100;
     progressBar.style.width = `${Math.min(progressionAnnuelle, 100)}%`;
     progressBar.className = `progress-bar ${progressionAnnuelle > 100 ? 'bg-danger' : 'bg-primary'}`;
     
+    // Calculer la progression des jours depuis le début du leasing
+    const maintenant = new Date();
+    const finLeasing = new Date(DATE_FIN);
+    const joursTotal = Math.ceil((finLeasing - DATE_DEBUT) / (1000 * 60 * 60 * 24));
+    const joursEcoules = Math.ceil((maintenant - DATE_DEBUT) / (1000 * 60 * 60 * 24));
+    const progressionJours = (joursEcoules / joursTotal) * 100;
+    
+    // Mettre à jour la barre de progression des jours
+    progressBarAnnee.style.width = `${progressionJours}%`;
+    jourActuel.textContent = joursEcoules;
+    document.getElementById('progressionAnnee').innerHTML = 
+        `<span id="jourActuel">${joursEcoules}</span> / ${joursTotal} jours`;
+    
     // Afficher le total annuel et mensuel
-    currentKm.innerHTML = `${totalKm.toLocaleString()} km (${totalMoisCourant.toLocaleString()} km ce mois-ci)`;
+    currentKm.innerHTML = `${totalKm.toLocaleString()} km`;
 }
 
 function mettreAJourStatistiques() {
