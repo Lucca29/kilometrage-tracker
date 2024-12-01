@@ -180,17 +180,8 @@ function initialiserNavigationMois() {
 }
 
 function getMoisCourant() {
-    const date = new Date();
-    // Si la date actuelle est avant la date de début, retourner le premier mois
-    if (date < DATE_DEBUT) {
-        return '2024-11';
-    }
-    // Si la date actuelle est après la date de fin, retourner le dernier mois
-    if (date > DATE_FIN) {
-        return '2025-11';
-    }
-    // Sinon, retourner le mois actuel
-    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+    // Utiliser le mois sélectionné dans l'interface
+    return moisSelectionne;
 }
 
 function calculerTotalMoisCourant() {
@@ -203,17 +194,24 @@ function calculerTotalMoisCourant() {
 }
 
 function calculerObjectifMensuel(mois) {
+    console.log('Calcul objectif pour le mois:', mois);
+    
     // Cas spécial pour novembre 2024 (3 jours)
     if (mois === '2024-11') {
-        return (OBJECTIF_MENSUEL / 30) * 3; // 3 jours sur 30
+        const objectif = (OBJECTIF_MENSUEL / 30) * 3;
+        console.log('Objectif novembre 2024:', objectif, 'km (3 jours)');
+        return objectif;
     }
     
     // Cas spécial pour novembre 2025 (28 jours)
     if (mois === '2025-11') {
-        return (OBJECTIF_MENSUEL / 30) * 28; // 28 jours sur 30
+        const objectif = (OBJECTIF_MENSUEL / 30) * 28;
+        console.log('Objectif novembre 2025:', objectif, 'km (28 jours)');
+        return objectif;
     }
     
     // Pour les autres mois, retourner l'objectif mensuel normal
+    console.log('Objectif mensuel normal:', OBJECTIF_MENSUEL, 'km');
     return OBJECTIF_MENSUEL;
 }
 
