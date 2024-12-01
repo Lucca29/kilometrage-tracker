@@ -2,8 +2,8 @@
 const OBJECTIF_ANNUEL = 20000;
 const OBJECTIF_MENSUEL = OBJECTIF_ANNUEL / 12; // 1666.66 km par mois
 const STORAGE_KEY = 'kilometrage_releves';
-const DATE_DEBUT = new Date('2024-11-28');
-const DATE_FIN = new Date('2025-11-28');
+const DATE_DEBUT = new Date('2023-11-28');
+const DATE_FIN = new Date('2024-11-28');
 
 // Variables globales
 let kmChart;
@@ -183,11 +183,11 @@ function getMoisCourant() {
     const date = new Date();
     // Si la date actuelle est avant la date de début, retourner le premier mois
     if (date < DATE_DEBUT) {
-        return '2024-11';
+        return '2023-11';
     }
     // Si la date actuelle est après la date de fin, retourner le dernier mois
     if (date > DATE_FIN) {
-        return '2025-11';
+        return '2024-11';
     }
     // Sinon, retourner le mois actuel
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
@@ -203,8 +203,8 @@ function calculerTotalMoisCourant() {
 }
 
 function calculerObjectifMensuel(mois) {
-    // Pour novembre 2024, calculer l'objectif sur 3 jours
-    if (mois === '2024-11') {
+    // Pour novembre 2023, calculer l'objectif sur 3 jours
+    if (mois === '2023-11') {
         const joursNovembre = 3; // 28, 29, 30 novembre
         return (OBJECTIF_MENSUEL / 30) * joursNovembre; // On considère un mois moyen de 30 jours
     }
@@ -420,10 +420,10 @@ function mettreAJourGraphique() {
         const dernierJourMois = new Date(annee, mois, 0).getDate();
         const dernierReleve = new Date(Math.max(...relevesMois.map(r => r.date)));
         
-        // Pour novembre 2024, s'arrêter au 30
+        // Pour novembre 2023, s'arrêter au 30
         let dateFin;
-        if (moisSelectionne === '2024-11') {
-            dateFin = new Date(2024, 10, 30); // Mois 10 = novembre (0-based)
+        if (moisSelectionne === '2023-11') {
+            dateFin = new Date(2023, 10, 30); // Mois 10 = novembre (0-based)
         } else {
             dateFin = new Date(annee, mois - 1, dernierJourMois);
         }
@@ -556,15 +556,12 @@ function mettreAJourProgression() {
     progressBar.className = `progress-bar ${progressionAnnuelle > 100 ? 'bg-danger' : 'bg-primary'}`;
     
     // Calculer la progression des jours depuis le début du leasing
-    const maintenant = new Date();
-    const finLeasing = new Date(DATE_FIN);
-    const joursTotal = Math.ceil((finLeasing - DATE_DEBUT) / (1000 * 60 * 60 * 24));
-    const joursEcoules = Math.ceil((maintenant - DATE_DEBUT) / (1000 * 60 * 60 * 24));
+    const joursTotal = 365; // Durée totale du leasing en jours
+    const joursEcoules = 3; // Nous sommes le 1er décembre, donc 3 jours depuis le 28 novembre
     const progressionJours = (joursEcoules / joursTotal) * 100;
     
     // Mettre à jour la barre de progression des jours
     progressBarAnnee.style.width = `${progressionJours}%`;
-    jourActuel.textContent = joursEcoules;
     document.getElementById('progressionAnnee').innerHTML = 
         `<span id="jourActuel">${joursEcoules}</span> / ${joursTotal} jours`;
     
@@ -731,7 +728,7 @@ function ajouterReleve27Novembre() {
     
     // Créer le nouveau relevé pour le 27 novembre
     const releve = {
-        date: new Date('2024-11-27'),
+        date: new Date('2023-11-27'),
         kilometrage: 0  // Mettez ici le kilométrage souhaité
     };
     
