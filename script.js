@@ -622,20 +622,27 @@ function mettreAJourStatistiques() {
 }
 
 function mettreAJourInterface() {
+    console.log('Mise à jour interface...');
+    console.log('Mois sélectionné:', moisSelectionne);
+    
     // Si on est en vue annuelle, ne rien faire
-    if (vueAnnuelle) return;
+    if (vueAnnuelle) {
+        console.log('Vue annuelle active, pas de mise à jour mensuelle');
+        return;
+    }
 
     // Calculer le total du mois courant
     totalMoisCourant = calculerTotalMoisCourant();
-    
-    // Mettre à jour le titre
-    document.querySelector('.card-title').textContent = 'Progression Mensuelle';
+    console.log('Total mois courant:', totalMoisCourant);
     
     // Calculer l'objectif mensuel ajusté
     const objectifMensuelAjuste = calculerObjectifMensuel(moisSelectionne);
+    console.log('Objectif mensuel ajusté:', objectifMensuelAjuste);
     
     // Mettre à jour la barre de progression mensuelle
     const pourcentageProgression = (totalMoisCourant / objectifMensuelAjuste) * 100;
+    console.log('Pourcentage progression:', pourcentageProgression + '%');
+    
     const progressBar = document.getElementById('progressBar');
     progressBar.style.width = Math.min(100, pourcentageProgression) + '%';
     
@@ -651,7 +658,8 @@ function mettreAJourInterface() {
     }
     
     // Mettre à jour l'affichage du kilométrage
-    document.getElementById('kilometrageInfo').innerHTML = `<span id="currentKm">${totalMoisCourant.toFixed(1)}</span> / ${objectifMensuelAjuste.toFixed(2)} km`;
+    document.getElementById('kilometrageInfo').innerHTML = 
+        `<span id="currentKm">${totalMoisCourant.toFixed(1)}</span> / ${objectifMensuelAjuste.toFixed(2)} km`;
     
     // Mettre à jour les statistiques
     mettreAJourStatistiques();
