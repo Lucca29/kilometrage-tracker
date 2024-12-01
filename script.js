@@ -208,6 +208,11 @@ function calculerObjectifMensuel(mois) {
         return (OBJECTIF_MENSUEL / 30) * 3; // 3 jours sur 30
     }
     
+    // Cas spécial pour novembre 2025 (28 jours)
+    if (mois === '2025-11') {
+        return (OBJECTIF_MENSUEL / 30) * 28; // 28 jours sur 30
+    }
+    
     // Pour les autres mois, retourner l'objectif mensuel normal
     return OBJECTIF_MENSUEL;
 }
