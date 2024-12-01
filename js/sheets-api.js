@@ -253,6 +253,27 @@ class SheetsManager {
         }
     }
 
+    async getKilometrageData() {
+        try {
+            await this.ensureAuthenticated();
+            
+            const response = await gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: this.SPREADSHEET_ID,
+                range: 'Feuille 1!A:B',
+            });
+
+            return response.result.values || [];
+        } catch (error) {
+            console.error('Erreur lors de la récupération des données:', error);
+            if (error.status === 401) {
+                await this.handleAuthError();
+                // Réessayer une fois après la réauthentification
+                return this.getKilometrageData();
+            }
+            throw error;
+        }
+    }
+
     async getAllKilometrageData() {
         try {
             await this.ensureAuthenticated();

@@ -85,6 +85,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Ajouter l'écouteur d'événements pour le bouton de vue annuelle
     document.getElementById('viewYearButton').addEventListener('click', basculerVueAnnuelle);
 
+    // Initialisation des éléments UI
+    const addDataBtn = document.getElementById('addDataBtn');
+    const refreshDataBtn = document.getElementById('refreshDataBtn');
+
+    // Fonction pour actualiser les données
+    async function refreshData() {
+        try {
+            refreshDataBtn.disabled = true;
+            refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualisation...';
+            
+            // Récupérer les nouvelles données
+            const data = await sheetsManager.getKilometrageData();
+            
+            // Mettre à jour les statistiques
+            if (data && data.length > 0) {
+                updateStats(data);
+            }
+            
+            refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualiser';
+            refreshDataBtn.disabled = false;
+        } catch (error) {
+            console.error('Erreur lors de l\'actualisation:', error);
+            alert('Erreur lors de l\'actualisation des données');
+            refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualiser';
+            refreshDataBtn.disabled = false;
+        }
+    }
+
+    // Ajouter l'écouteur d'événement pour le bouton d'actualisation
+    refreshDataBtn.addEventListener('click', refreshData);
+
     // Mettre à jour l'interface initiale
     mettreAJourInterface();
 });
