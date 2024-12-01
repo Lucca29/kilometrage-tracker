@@ -216,29 +216,28 @@ function chargerDonnees() {
     const donneesStockees = localStorage.getItem(STORAGE_KEY);
     if (donneesStockees) {
         try {
-            // Convertir les chaînes de date en objets Date
-            releves = JSON.parse(donneesStockees).map(releve => ({
-                ...releve,
-                date: new Date(releve.date)
-            }));
-            console.log('Données chargées:', releves);
-            
-            // Calculer le total des kilomètres
-            totalKm = releves.reduce((sum, releve) => sum + releve.kilometrage, 0);
-            
-            // Calculer le total du mois courant
-            totalMoisCourant = calculerTotalMoisCourant();
+            const donneesParsees = JSON.parse(donneesStockees);
+            releves = donneesParsees.map(releve => {
+                // Si la date est une chaîne au format dd/mm/yyyy
+                if (typeof releve.date === 'string' && releve.date.includes('/')) {
+                    const [day, month, year] = releve.date.split('/').map(Number);
+                    return {
+                        date: new Date(year, month - 1, day),
+                        kilometrage: parseFloat(releve.kilometrage)
+                    };
+                }
+                // Si c'est déjà un objet Date (stocké comme chaîne ISO)
+                return {
+                    date: new Date(releve.date),
+                    kilometrage: parseFloat(releve.kilometrage)
+                };
+            });
         } catch (error) {
             console.error('Erreur lors du chargement des données:', error);
             releves = [];
-            totalKm = 0;
-            totalMoisCourant = 0;
         }
     } else {
-        console.log('Aucune donnée stockée trouvée');
         releves = [];
-        totalKm = 0;
-        totalMoisCourant = 0;
     }
 }
 
