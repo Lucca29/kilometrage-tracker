@@ -91,32 +91,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Fonction pour actualiser les données
     async function refreshData() {
+        console.log('Début de refreshData');
         try {
             refreshDataBtn.disabled = true;
             refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i> Actualisation...';
             
-            // Récupérer les nouvelles données
+            console.log('Récupération des données depuis Google Sheets...');
             const data = await sheetsManager.getKilometrageData();
+            console.log('Données reçues:', data);
             
-            // Mettre à jour les statistiques
             if (data && data.length > 0) {
-                // Convertir les données en format utilisable
+                console.log('Formatage des données...');
                 const formattedData = data.map(row => ({
                     date: row[0],
                     kilometrage: parseFloat(row[1])
                 }));
+                console.log('Données formatées:', formattedData);
                 
-                // Mettre à jour les données globales
+                console.log('Mise à jour des données globales...');
                 releves = formattedData;
                 
-                // Mettre à jour l'interface
+                console.log('Mise à jour de l\'interface...');
                 mettreAJourInterface();
+                console.log('Interface mise à jour');
+            } else {
+                console.log('Aucune donnée reçue');
             }
             
             refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i> Actualiser';
             refreshDataBtn.disabled = false;
+            console.log('Actualisation terminée avec succès');
         } catch (error) {
-            console.error('Erreur lors de l\'actualisation:', error);
+            console.error('Erreur détaillée lors de l\'actualisation:', {
+                message: error.message,
+                stack: error.stack,
+                error: error
+            });
             alert('Erreur lors de l\'actualisation des données');
             refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i> Actualiser';
             refreshDataBtn.disabled = false;
