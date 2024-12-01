@@ -93,22 +93,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function refreshData() {
         try {
             refreshDataBtn.disabled = true;
-            refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualisation...';
+            refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i> Actualisation...';
             
             // Récupérer les nouvelles données
             const data = await sheetsManager.getKilometrageData();
             
             // Mettre à jour les statistiques
             if (data && data.length > 0) {
-                updateStats(data);
+                // Convertir les données en format utilisable
+                const formattedData = data.map(row => ({
+                    date: row[0],
+                    kilometrage: parseFloat(row[1])
+                }));
+                
+                // Mettre à jour les données globales
+                releves = formattedData;
+                
+                // Mettre à jour l'interface
+                mettreAJourInterface();
             }
             
-            refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualiser';
+            refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i> Actualiser';
             refreshDataBtn.disabled = false;
         } catch (error) {
             console.error('Erreur lors de l\'actualisation:', error);
             alert('Erreur lors de l\'actualisation des données');
-            refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualiser';
+            refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i> Actualiser';
             refreshDataBtn.disabled = false;
         }
     }
