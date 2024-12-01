@@ -96,31 +96,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             refreshDataBtn.disabled = true;
             refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i> Actualisation...';
             
-            console.log('Récupération des données depuis Google Sheets...');
             const data = await sheetsManager.getKilometrageData();
-            console.log('Données reçues:', data);
             
             if (data && data.length > 0) {
-                console.log('Formatage des données...');
-                const formattedData = data.map(row => ({
-                    date: row[0],
-                    kilometrage: parseFloat(row[1])
-                }));
-                console.log('Données formatées:', formattedData);
+                // Convertir les données avec la date en objet Date
+                const formattedData = data.map(row => {
+                    // Convertir la date (format "dd/mm/yyyy") en objet Date
+                    const [day, month, year] = row[0].split('/').map(Number);
+                    return {
+                        date: new Date(year, month - 1, day), // month - 1 car les mois commencent à 0
+                        kilometrage: parseFloat(row[1])
+                    };
+                });
                 
-                console.log('Mise à jour des données globales...');
+                // Mettre à jour les données globales
                 releves = formattedData;
                 
-                console.log('Mise à jour de l\'interface...');
+                // Mettre à jour l'interface
                 mettreAJourInterface();
-                console.log('Interface mise à jour');
-            } else {
-                console.log('Aucune donnée reçue');
             }
             
             refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i> Actualiser';
             refreshDataBtn.disabled = false;
-            console.log('Actualisation terminée avec succès');
         } catch (error) {
             console.error('Erreur détaillée lors de l\'actualisation:', {
                 message: error.message,
