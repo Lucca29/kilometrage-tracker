@@ -203,11 +203,12 @@ function calculerTotalMoisCourant() {
 }
 
 function calculerObjectifMensuel(mois) {
-    // Pour novembre 2024, calculer l'objectif sur 3 jours
+    // Cas spécial pour novembre 2024 (3 jours)
     if (mois === '2024-11') {
-        const joursNovembre = 3; // 28, 29, 30 novembre
-        return (OBJECTIF_MENSUEL / 30) * joursNovembre; // On considère un mois moyen de 30 jours
+        return (OBJECTIF_MENSUEL / 30) * 3; // 3 jours sur 30
     }
+    
+    // Pour les autres mois, retourner l'objectif mensuel normal
     return OBJECTIF_MENSUEL;
 }
 
