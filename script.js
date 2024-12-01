@@ -548,7 +548,6 @@ function mettreAJourProgression() {
     const progressBar = document.getElementById('progressBar');
     const currentKm = document.getElementById('currentKm');
     const progressBarAnnee = document.getElementById('progressBarAnnee');
-    const jourActuel = document.getElementById('jourActuel');
     
     // Calculer la progression annuelle des kilomètres
     const progressionAnnuelle = (totalKm / OBJECTIF_ANNUEL) * 100;
@@ -556,8 +555,14 @@ function mettreAJourProgression() {
     progressBar.className = `progress-bar ${progressionAnnuelle > 100 ? 'bg-danger' : 'bg-primary'}`;
     
     // Calculer la progression des jours depuis le début du leasing
-    const joursTotal = 365; // Durée totale du leasing en jours
-    const joursEcoules = 3; // Nous sommes le 1er décembre, donc 3 jours depuis le 28 novembre
+    const maintenant = new Date();
+    const debut = new Date('2024-11-28');
+    const joursTotal = 365;
+    
+    // Calculer la différence en jours
+    const diffTime = Math.abs(maintenant - debut);
+    const joursEcoules = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
     const progressionJours = (joursEcoules / joursTotal) * 100;
     
     // Mettre à jour la barre de progression des jours
