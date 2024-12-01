@@ -10,7 +10,7 @@ let kmChart;
 let releves = [];
 let totalKm = 0;
 let totalMoisCourant = 0;
-let moisSelectionne = getMoisCourant();
+let moisSelectionne = '2024-11'; // Initialisation au mois de début
 let vueAnnuelle = false;
 
 // Initialisation du gestionnaire Google Sheets
