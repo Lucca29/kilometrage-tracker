@@ -556,11 +556,13 @@ function mettreAJourProgression() {
     
     // Calculer la progression des jours depuis le début du leasing
     const maintenant = new Date();
+    // Simuler que nous sommes en 2024
+    const dateSimulee = new Date(2024, maintenant.getMonth(), maintenant.getDate());
     const debut = new Date('2024-11-28');
     const joursTotal = 365;
     
     // Calculer la différence en jours
-    const diffTime = Math.abs(maintenant - debut);
+    const diffTime = Math.abs(dateSimulee - debut);
     const joursEcoules = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     const progressionJours = (joursEcoules / joursTotal) * 100;
