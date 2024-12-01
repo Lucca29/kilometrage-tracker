@@ -450,6 +450,9 @@ function mettreAJourGraphique() {
 function afficherStatistiquesAnnuelles() {
     vueAnnuelle = true;
     
+    // Mettre à jour la progression annuelle
+    mettreAJourProgression();
+
     // Mettre à jour le titre de la progression
     document.querySelector('.card-title').textContent = 'Progression Annuelle';
     
@@ -545,6 +548,7 @@ function mettreAJourGraphiqueAnnuel() {
 }
 
 function mettreAJourProgression() {
+    console.log('Mise à jour de la progression annuelle');
     const progressBar = document.getElementById('progressBar');
     const currentKm = document.getElementById('currentKm');
     const progressBarAnnee = document.getElementById('progressBarAnnee');
@@ -555,22 +559,22 @@ function mettreAJourProgression() {
     progressBar.className = `progress-bar ${progressionAnnuelle > 100 ? 'bg-danger' : 'bg-primary'}`;
     
     // Calculer la progression des jours depuis le début du leasing
-    const maintenant = new Date();
-    // Simuler que nous sommes en 2024
-    const dateSimulee = new Date(2024, maintenant.getMonth(), maintenant.getDate());
-    const debut = new Date('2024-11-28');
     const joursTotal = 365;
-    
-    // Calculer la différence en jours
-    const diffTime = Math.abs(dateSimulee - debut);
-    const joursEcoules = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+    const joursEcoules = 3; // 3 jours depuis le 28 novembre (28, 29, 30 nov)
     const progressionJours = (joursEcoules / joursTotal) * 100;
     
+    console.log('Jours écoulés:', joursEcoules);
+    console.log('Progression jours:', progressionJours + '%');
+    
     // Mettre à jour la barre de progression des jours
-    progressBarAnnee.style.width = `${progressionJours}%`;
-    document.getElementById('progressionAnnee').innerHTML = 
-        `<span id="jourActuel">${joursEcoules}</span> / ${joursTotal} jours`;
+    if (progressBarAnnee) {
+        console.log('Mise à jour de la barre de progression annuelle');
+        progressBarAnnee.style.width = `${progressionJours}%`;
+        document.getElementById('progressionAnnee').innerHTML = 
+            `<span id="jourActuel">${joursEcoules}</span> / ${joursTotal} jours`;
+    } else {
+        console.error('progressBarAnnee non trouvé !');
+    }
     
     // Afficher le total annuel et mensuel
     currentKm.innerHTML = `${totalKm.toLocaleString()} km`;
@@ -637,7 +641,10 @@ function mettreAJourStatistiques() {
 }
 
 function mettreAJourInterface() {
-    // Si on est en vue annuelle, ne rien faire
+    // Toujours mettre à jour la progression annuelle
+    mettreAJourProgression();
+
+    // Si on est en vue annuelle, ne pas mettre à jour le reste
     if (vueAnnuelle) return;
 
     // Calculer le total du mois courant
