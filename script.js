@@ -455,11 +455,21 @@ function afficherStatistiquesAnnuelles() {
     // Mettre à jour le titre de la progression
     document.querySelector('.card-title').textContent = 'Progression Annuelle';
     
+    console.log('Relevés disponibles:', releves);
+    
     // Calculer le total annuel
-    const totalAnnuel = releves.reduce((sum, releve) => sum + releve.kilometrage, 0);
+    const totalAnnuel = releves.reduce((sum, releve) => {
+        console.log('Traitement relevé:', releve);
+        console.log('Kilométrage:', releve.kilometrage);
+        return sum + releve.kilometrage;
+    }, 0);
+    
+    console.log('Total annuel calculé:', totalAnnuel);
     
     // Mettre à jour la barre de progression
     const pourcentageProgression = (totalAnnuel / OBJECTIF_ANNUEL) * 100;
+    console.log('Pourcentage progression:', pourcentageProgression + '%');
+    
     const progressBar = document.getElementById('progressBar');
     progressBar.style.width = Math.min(100, pourcentageProgression) + '%';
     
