@@ -114,8 +114,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Sauvegarder les données dans le localStorage
                 try {
+                    console.log('Données à sauvegarder:', formattedData);
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(formattedData));
                     console.log('Données sauvegardées dans le localStorage');
+                    
+                    // Vérifier ce qui a été sauvegardé
+                    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                    console.log('Données lues depuis le localStorage:', saved);
                 } catch (e) {
                     console.error('Erreur lors de la sauvegarde dans le localStorage:', e);
                 }
