@@ -465,10 +465,26 @@ function afficherStatistiquesAnnuelles() {
     // Mettre à jour le titre de la progression
     document.querySelector('.card-title').textContent = 'Progression Annuelle';
     
-    console.log('Relevés disponibles:', releves);
+    console.log('Relevés bruts:', releves);
+    
+    // Filtrer les entrées invalides et les doublons
+    const relevesValides = releves.filter(releve => {
+        // Vérifier que la date est valide (pas 1970)
+        const anneeValide = releve.date.getFullYear() > 1970;
+        // Vérifier que le kilométrage est un nombre valide et > 0
+        const kilometrageValide = !isNaN(releve.kilometrage) && releve.kilometrage > 0;
+        return anneeValide && kilometrageValide;
+    });
+    
+    // Supprimer les doublons en gardant la dernière entrée pour chaque date
+    const relevesUniques = Array.from(new Map(
+        relevesValides.map(releve => [releve.date.toISOString().split('T')[0], releve])
+    ).values());
+    
+    console.log('Relevés filtrés:', relevesUniques);
     
     // Calculer le total annuel
-    const totalAnnuel = releves.reduce((sum, releve) => {
+    const totalAnnuel = relevesUniques.reduce((sum, releve) => {
         console.log('Traitement relevé:', releve);
         console.log('Kilométrage:', releve.kilometrage);
         return sum + releve.kilometrage;
@@ -499,7 +515,7 @@ function afficherStatistiquesAnnuelles() {
     document.getElementById('kilometrageInfo').innerHTML = `<span id="currentKm">${totalAnnuel.toFixed(1)}</span> / ${OBJECTIF_ANNUEL} km`;
     
     // Calculer les statistiques annuelles
-    if (releves.length === 0) {
+    if (relevesUniques.length === 0) {
         document.getElementById('moyenneJour').textContent = '0 km/jour';
         document.getElementById('previsionMois').textContent = '0 km';
         document.getElementById('projectionAnnuelle').textContent = '0 km';
@@ -508,8 +524,8 @@ function afficherStatistiquesAnnuelles() {
     }
     
     // Calculer la moyenne journalière sur toute l'année
-    const premierReleve = new Date(Math.min(...releves.map(r => r.date)));
-    const dernierReleve = new Date(Math.max(...releves.map(r => r.date)));
+    const premierReleve = new Date(Math.min(...relevesUniques.map(r => r.date)));
+    const dernierReleve = new Date(Math.max(...relevesUniques.map(r => r.date)));
     const joursEcoules = Math.max(1, Math.ceil((dernierReleve - premierReleve) / (1000 * 60 * 60 * 24))) + 1;
     const moyenneJournaliere = totalAnnuel / joursEcoules;
     
