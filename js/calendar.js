@@ -38,7 +38,8 @@ function maybeEnableButtons() {
 
 document.addEventListener('DOMContentLoaded', function() {
     const calendar = document.getElementById('calendar');
-    let currentDate = new Date();
+    // Initialiser sur décembre 2024
+    let currentDate = new Date(2024, 11, 1); // Note: les mois commencent à 0, donc 11 = décembre
     let releves = [];
     
     async function init() {
@@ -51,6 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
             generateCalendar(currentDate);
             // Afficher le calendrier une fois les données chargées
             calendar.style.display = 'block';
+            
+            // Actualiser les données toutes les 30 secondes
+            setInterval(refreshData, 30000);
         } catch (error) {
             console.error('Erreur d\'initialisation:', error);
         }
@@ -169,6 +173,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         html += '</tbody></table>';
         calendar.innerHTML = html;
+    }
+    
+    async function refreshData() {
+        try {
+            await loadData();
+            generateCalendar(currentDate);
+        } catch (error) {
+            console.error('Erreur lors de l\'actualisation:', error);
+        }
     }
     
     window.prevMonth = async function() {
