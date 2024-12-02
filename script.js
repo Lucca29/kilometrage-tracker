@@ -97,17 +97,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i> Actualisation...';
             
             const data = await sheetsManager.getKilometrageData();
+            console.log('Données reçues de Google Sheets:', data);
             
             if (data && data.length > 0) {
                 // Convertir les données avec la date en objet Date
                 const formattedData = data.map(row => {
                     // Convertir la date (format "dd/mm/yyyy") en objet Date
                     const [day, month, year] = row[0].split('/').map(Number);
+                    const kilometrage = parseFloat(row[1].replace(',', '.'));
+                    console.log(`Conversion: Date=${day}/${month}/${year}, Kilométrage=${kilometrage}`);
                     return {
-                        date: new Date(year, month - 1, day), // month - 1 car les mois commencent à 0
-                        kilometrage: parseFloat(row[1])
+                        date: new Date(year, month - 1, day),
+                        kilometrage: kilometrage
                     };
                 });
+                
+                console.log('Données formatées:', formattedData);
                 
                 // Mettre à jour les données globales
                 releves = formattedData;
