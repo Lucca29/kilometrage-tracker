@@ -39,7 +39,6 @@ function maybeEnableButtons() {
 document.addEventListener('DOMContentLoaded', function() {
     const calendar = document.getElementById('calendar');
     let currentDate = new Date();
-    const sheetsManager = new SheetsManager();
     let releves = [];
     
     async function init() {
