@@ -61,21 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await sheetsManager.getAllKilometrageData();
             console.log('Réponse de getAllKilometrageData:', response);
             if (response && response.length > 0) {
-                // Convertir les données du tableau en objets
-                releves = response.slice(1).map(row => {
-                    const [dateStr, kilometrage] = row;
-                    // Convertir la date du format "DD/MM/YYYY" en "YYYY-MM-DD"
-                    const [day, month, year] = dateStr.split('/');
-                    const date = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-                    
-                    const obj = {
-                        date: date,
-                        kilometrage: parseFloat(kilometrage),
-                        difference: parseFloat(kilometrage)
-                    };
-                    console.log('Relevé traité:', obj);
-                    return obj;
-                });
+                releves = response;
             } else {
                 console.warn('Pas de données dans la réponse:', response);
             }
