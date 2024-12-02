@@ -112,6 +112,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Mettre à jour les données globales
                 releves = formattedData;
                 
+                // Sauvegarder les données dans le localStorage
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(formattedData));
+                    console.log('Données sauvegardées dans le localStorage');
+                } catch (e) {
+                    console.error('Erreur lors de la sauvegarde dans le localStorage:', e);
+                }
+                
                 // Mettre à jour l'interface
                 mettreAJourInterface();
             }
