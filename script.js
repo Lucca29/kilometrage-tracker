@@ -229,21 +229,11 @@ function chargerDonnees() {
     if (donneesStockees) {
         try {
             const donneesParsees = JSON.parse(donneesStockees);
-            releves = donneesParsees.map(releve => {
-                // Si la date est une chaîne au format dd/mm/yyyy
-                if (typeof releve.date === 'string' && releve.date.includes('/')) {
-                    const [day, month, year] = releve.date.split('/').map(Number);
-                    return {
-                        date: new Date(year, month - 1, day),
-                        kilometrage: parseFloat(releve.kilometrage)
-                    };
-                }
-                // Si c'est déjà un objet Date (stocké comme chaîne ISO)
-                return {
-                    date: new Date(releve.date),
-                    kilometrage: parseFloat(releve.kilometrage)
-                };
-            });
+            releves = donneesParsees.map(releve => ({
+                date: new Date(releve.date),
+                kilometrage: parseFloat(releve.kilometrage)
+            }));
+            console.log('Données chargées depuis le localStorage:', releves);
         } catch (error) {
             console.error('Erreur lors du chargement des données:', error);
             releves = [];
