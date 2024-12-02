@@ -1,21 +1,42 @@
 document.addEventListener('DOMContentLoaded', function() {
     const calendar = document.getElementById('calendar');
     let currentDate = new Date();
-    const STORAGE_KEY = 'kilometrage_releves';
+    const sheetsManager = new SheetsManager();
+    let releves = [];
     
-    function getReleves() {
-        const relevesStr = localStorage.getItem(STORAGE_KEY);
-        return relevesStr ? JSON.parse(relevesStr) : [];
+    async function init() {
+        try {
+            await sheetsManager.init();
+            await loadData();
+            generateCalendar(currentDate);
+        } catch (error) {
+            console.error('Erreur d\'initialisation:', error);
+        }
+    }
+    
+    async function loadData() {
+        try {
+            const response = await sheetsManager.getSheetData();
+            if (response && response.result && response.result.values) {
+                // Convertir les données du tableau en objets
+                releves = response.result.values.slice(1).map(row => ({
+                    date: row[0],
+                    kilometrage: parseFloat(row[1]),
+                    difference: parseFloat(row[2] || 0)
+                }));
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement des données:', error);
+        }
     }
     
     function getKilometrageForDay(date) {
-        const releves = getReleves();
         const dateStr = date.toISOString().split('T')[0];
         const relevesForDay = releves.filter(r => r.date === dateStr);
         
         if (relevesForDay.length > 0) {
             // Calculer la différence de kilométrage pour ce jour
-            const kilometrage = relevesForDay.reduce((total, releve) => total + releve.difference, 0);
+            const kilometrage = relevesForDay.reduce((total, releve) => total + (releve.difference || 0), 0);
             return kilometrage;
         }
         return null;
@@ -90,15 +111,18 @@ document.addEventListener('DOMContentLoaded', function() {
         calendar.innerHTML = html;
     }
     
-    window.prevMonth = function() {
+    window.prevMonth = async function() {
         currentDate.setMonth(currentDate.getMonth() - 1);
+        await loadData();
         generateCalendar(currentDate);
     };
     
-    window.nextMonth = function() {
+    window.nextMonth = async function() {
         currentDate.setMonth(currentDate.getMonth() + 1);
+        await loadData();
         generateCalendar(currentDate);
     };
     
-    generateCalendar(currentDate);
+    // Démarrer l'initialisation
+    init();
 });
