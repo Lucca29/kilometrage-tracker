@@ -58,15 +58,20 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadData() {
         try {
             console.log('Chargement des données...');
-            const response = await sheetsManager.getSheetData();
-            console.log('Réponse de getSheetData:', response);
-            if (response && response.result && response.result.values) {
+            const response = await sheetsManager.getAllKilometrageData();
+            console.log('Réponse de getAllKilometrageData:', response);
+            if (response && response.length > 0) {
                 // Convertir les données du tableau en objets
-                releves = response.result.values.slice(1).map(row => {
+                releves = response.slice(1).map(row => {
+                    const [dateStr, kilometrage] = row;
+                    // Convertir la date du format "DD/MM/YYYY" en "YYYY-MM-DD"
+                    const [day, month, year] = dateStr.split('/');
+                    const date = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                    
                     const obj = {
-                        date: row[0],
-                        kilometrage: parseFloat(row[1]),
-                        difference: parseFloat(row[2] || 0)
+                        date: date,
+                        kilometrage: parseFloat(kilometrage),
+                        difference: parseFloat(kilometrage)
                     };
                     console.log('Relevé traité:', obj);
                     return obj;
