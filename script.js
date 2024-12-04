@@ -157,10 +157,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Mettre à jour les données globales
             releves = formattedData;
             
-            // Sauvegarder les données localement
-            console.log('Sauvegarde des données:', releves);
-            sauvegarderDonnees();
-            console.log('Données sauvegardées avec succès');
+            // Sauvegarder immédiatement dans le localStorage
+            localStorage.setItem('derniere_actualisation', new Date().toISOString());
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(formattedData));
+            console.log('Données sauvegardées dans le localStorage');
             
             // Mettre à jour l'interface
             mettreAJourInterface();
@@ -264,50 +264,27 @@ function calculerObjectifMensuel(mois) {
 
 // Fonctions de gestion des données
 function chargerDonnees() {
-    console.log('Début du chargement des données');
-    const donneesSauvegardees = localStorage.getItem(STORAGE_KEY);
-    
-    if (donneesSauvegardees) {
-        try {
-            console.log('Données trouvées dans le localStorage');
-            const donneesParsees = JSON.parse(donneesSauvegardees);
-            
-            if (!Array.isArray(donneesParsees)) {
-                throw new Error('Les données chargées ne sont pas un tableau');
-            }
-            
-            releves = donneesParsees.map(releve => {
-                if (!releve.date || !releve.kilometrage) {
-                    console.error('Relevé invalide dans les données chargées:', releve);
-                    return null;
-                }
-                
-                const date = new Date(releve.date);
-                if (isNaN(date.getTime())) {
-                    console.error('Date invalide dans le relevé:', releve);
-                    return null;
-                }
-                
-                const kilometrage = parseFloat(releve.kilometrage);
-                if (isNaN(kilometrage)) {
-                    console.error('Kilométrage invalide dans le relevé:', releve);
-                    return null;
-                }
-                
-                return {
-                    date: date,
-                    kilometrage: kilometrage
-                };
-            }).filter(r => r !== null);
-            
-            console.log('Données chargées et validées:', releves);
-        } catch (error) {
-            console.error('Erreur lors du chargement des données:', error);
-            afficherMessage('Erreur lors du chargement des données', 'error');
-            releves = [];
+    try {
+        const donneesSauvegardees = localStorage.getItem(STORAGE_KEY);
+        if (!donneesSauvegardees) {
+            console.log('Aucune donnée en cache');
+            return;
         }
-    } else {
-        console.log('Aucune donnée trouvée dans le localStorage');
+
+        const donneesParsees = JSON.parse(donneesSauvegardees);
+        if (!Array.isArray(donneesParsees)) {
+            console.error('Les données en cache ne sont pas un tableau');
+            return;
+        }
+
+        releves = donneesParsees.map(releve => ({
+            date: new Date(releve.date),
+            kilometrage: parseFloat(releve.kilometrage)
+        }));
+
+        console.log('Données chargées depuis le cache:', releves);
+    } catch (error) {
+        console.error('Erreur lors du chargement des données:', error);
         releves = [];
     }
 }
