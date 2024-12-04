@@ -203,9 +203,24 @@ class SheetsManager {
     }
 
     async ensureAuthenticated() {
+        console.log('Vérification de l\'authentification...');
+        console.log('État actuel:', {
+            gapiInited: this.gapiInited,
+            gisInited: this.gisInited,
+            isAuthenticated: this.isAuthenticated
+        });
+
+        if (!this.gapiInited || !this.gisInited) {
+            console.error('API Google non initialisée');
+            throw new Error('API Google non initialisée. Veuillez recharger la page.');
+        }
+
         if (!this.isAuthenticated) {
-            console.log('Authentication nécessaire');
+            console.log('Non authentifié, demande d\'authentification...');
             await this.requestAuth();
+            console.log('Authentification réussie');
+        } else {
+            console.log('Déjà authentifié');
         }
     }
 
