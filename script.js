@@ -117,6 +117,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         continue;
                     }
                     
+                    // Ignorer la ligne "Total"
+                    if (row[0].trim().toLowerCase().startsWith('total')) {
+                        console.log('Ligne Total ignorée:', row);
+                        continue;
+                    }
+                    
                     console.log('Traitement de la ligne:', row);
                     const dateParts = row[0].split('/');
                     if (dateParts.length !== 3) {
@@ -150,6 +156,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Mettre à jour les données globales
             releves = formattedData;
+            
+            // Sauvegarder les données localement
+            console.log('Sauvegarde des données:', releves);
+            sauvegarderDonnees();
+            console.log('Données sauvegardées avec succès');
             
             // Mettre à jour l'interface
             mettreAJourInterface();
@@ -253,42 +264,92 @@ function calculerObjectifMensuel(mois) {
 
 // Fonctions de gestion des données
 function chargerDonnees() {
-    const donneesStockees = localStorage.getItem(STORAGE_KEY);
-    if (donneesStockees) {
+    console.log('Début du chargement des données');
+    const donneesSauvegardees = localStorage.getItem(STORAGE_KEY);
+    
+    if (donneesSauvegardees) {
         try {
-            const donneesParsees = JSON.parse(donneesStockees);
+            console.log('Données trouvées dans le localStorage');
+            const donneesParsees = JSON.parse(donneesSauvegardees);
+            
+            if (!Array.isArray(donneesParsees)) {
+                throw new Error('Les données chargées ne sont pas un tableau');
+            }
+            
             releves = donneesParsees.map(releve => {
-                // Si la date est une chaîne au format dd/mm/yyyy
-                if (typeof releve.date === 'string' && releve.date.includes('/')) {
-                    const [day, month, year] = releve.date.split('/').map(Number);
-                    return {
-                        date: new Date(year, month - 1, day),
-                        kilometrage: parseFloat(releve.kilometrage)
-                    };
+                if (!releve.date || !releve.kilometrage) {
+                    console.error('Relevé invalide dans les données chargées:', releve);
+                    return null;
                 }
-                // Si c'est déjà un objet Date (stocké comme chaîne ISO)
+                
+                const date = new Date(releve.date);
+                if (isNaN(date.getTime())) {
+                    console.error('Date invalide dans le relevé:', releve);
+                    return null;
+                }
+                
+                const kilometrage = parseFloat(releve.kilometrage);
+                if (isNaN(kilometrage)) {
+                    console.error('Kilométrage invalide dans le relevé:', releve);
+                    return null;
+                }
+                
                 return {
-                    date: new Date(releve.date),
-                    kilometrage: parseFloat(releve.kilometrage)
+                    date: date,
+                    kilometrage: kilometrage
                 };
-            });
+            }).filter(r => r !== null);
+            
+            console.log('Données chargées et validées:', releves);
         } catch (error) {
             console.error('Erreur lors du chargement des données:', error);
+            afficherMessage('Erreur lors du chargement des données', 'error');
             releves = [];
         }
     } else {
+        console.log('Aucune donnée trouvée dans le localStorage');
         releves = [];
     }
 }
 
 function sauvegarderDonnees() {
-    // Convertir les dates en chaînes avant la sauvegarde
-    const relevesASauvegarder = releves.map(releve => ({
-        ...releve,
-        date: releve.date.toISOString()
-    }));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(relevesASauvegarder));
-    console.log('Données sauvegardées:', relevesASauvegarder);
+    try {
+        console.log('Début de la sauvegarde des données. Nombre de relevés:', releves.length);
+        
+        // Vérifier que les données sont valides
+        if (!Array.isArray(releves)) {
+            throw new Error('Les relevés ne sont pas un tableau');
+        }
+        
+        // Convertir les dates en chaînes avant la sauvegarde
+        const relevesASauvegarder = releves.map(releve => {
+            if (!releve.date || !releve.kilometrage) {
+                console.error('Relevé invalide:', releve);
+                return null;
+            }
+            return {
+                date: releve.date.toISOString(),
+                kilometrage: parseFloat(releve.kilometrage)
+            };
+        }).filter(r => r !== null);
+
+        console.log('Données préparées pour la sauvegarde:', relevesASauvegarder);
+        
+        // Sauvegarder dans le localStorage
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(relevesASauvegarder));
+        console.log('Données sauvegardées avec succès dans le localStorage');
+        
+        // Vérifier que la sauvegarde a fonctionné
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (!savedData) {
+            throw new Error('Les données n\'ont pas été sauvegardées correctement');
+        }
+        
+        console.log('Vérification de la sauvegarde réussie');
+    } catch (error) {
+        console.error('Erreur lors de la sauvegarde des données:', error);
+        afficherMessage('Erreur lors de la sauvegarde des données', 'error');
+    }
 }
 
 async function ajouterReleve() {
