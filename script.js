@@ -101,13 +101,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (data && data.length > 0) {
                 // Convertir les données avec la date en objet Date
                 const formattedData = data.map(row => {
+                    // Vérifier que row[0] existe avant de faire le split
+                    if (!row || !row[0]) {
+                        console.error('Format de données invalide:', row);
+                        return null;
+                    }
                     // Convertir la date (format "dd/mm/yyyy") en objet Date
                     const [day, month, year] = row[0].split('/').map(Number);
                     return {
                         date: new Date(year, month - 1, day), // month - 1 car les mois commencent à 0
                         kilometrage: parseFloat(row[1])
                     };
-                });
+                }).filter(item => item !== null); // Filtrer les entrées invalides
                 
                 // Mettre à jour les données globales
                 releves = formattedData;
