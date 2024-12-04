@@ -97,39 +97,70 @@ document.addEventListener('DOMContentLoaded', async () => {
             refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i> Actualisation...';
             
             const data = await sheetsManager.getKilometrageData();
+            console.log('Données reçues:', data);
             
-            if (data && data.length > 0) {
-                // Convertir les données avec la date en objet Date
-                const formattedData = data.map(row => {
-                    // Vérifier que row[0] existe avant de faire le split
-                    if (!row || !row[0]) {
-                        console.error('Format de données invalide:', row);
-                        return null;
-                    }
-                    // Convertir la date (format "dd/mm/yyyy") en objet Date
-                    const [day, month, year] = row[0].split('/').map(Number);
-                    return {
-                        date: new Date(year, month - 1, day), // month - 1 car les mois commencent à 0
-                        kilometrage: parseFloat(row[1])
-                    };
-                }).filter(item => item !== null); // Filtrer les entrées invalides
-                
-                // Mettre à jour les données globales
-                releves = formattedData;
-                
-                // Mettre à jour l'interface
-                mettreAJourInterface();
+            if (!data || !Array.isArray(data)) {
+                throw new Error('Les données reçues ne sont pas un tableau');
             }
+
+            if (data.length === 0) {
+                console.log('Aucune donnée reçue');
+                return;
+            }
+
+            // Convertir les données avec la date en objet Date
+            const formattedData = [];
+            for (let row of data) {
+                try {
+                    if (!row || !Array.isArray(row) || row.length < 2 || !row[0]) {
+                        console.error('Ligne invalide:', row);
+                        continue;
+                    }
+                    
+                    console.log('Traitement de la ligne:', row);
+                    const dateParts = row[0].split('/');
+                    if (dateParts.length !== 3) {
+                        console.error('Format de date invalide:', row[0]);
+                        continue;
+                    }
+
+                    const [day, month, year] = dateParts.map(Number);
+                    const date = new Date(year, month - 1, day);
+                    const kilometrage = parseFloat(row[1]);
+
+                    if (isNaN(date.getTime()) || isNaN(kilometrage)) {
+                        console.error('Conversion invalide:', { date, kilometrage });
+                        continue;
+                    }
+
+                    formattedData.push({
+                        date: date,
+                        kilometrage: kilometrage
+                    });
+                } catch (err) {
+                    console.error('Erreur lors du traitement de la ligne:', row, err);
+                }
+            }
+
+            console.log('Données formatées:', formattedData);
             
-            refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i> Actualiser';
-            refreshDataBtn.disabled = false;
+            if (formattedData.length === 0) {
+                throw new Error('Aucune donnée valide après formatage');
+            }
+
+            // Mettre à jour les données globales
+            releves = formattedData;
+            
+            // Mettre à jour l'interface
+            mettreAJourInterface();
         } catch (error) {
             console.error('Erreur détaillée lors de l\'actualisation:', {
                 message: error.message,
                 stack: error.stack,
                 error: error
             });
-            alert('Erreur lors de l\'actualisation des données');
+            afficherMessage('Erreur lors de l\'actualisation des données. Vérifiez la console pour plus de détails.', 'error');
+        } finally {
             refreshDataBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i> Actualiser';
             refreshDataBtn.disabled = false;
         }
@@ -541,7 +572,7 @@ function mettreAJourGraphiqueAnnuel() {
     
     const labels = relevesTries.map(r => r.date.toLocaleDateString());
     
-    // Créer la ligne d'objectif
+    // Créer la ligne d'objectif avec l'objectif mensuel ajusté
     const objectifJournalier = OBJECTIF_ANNUEL / 365;
     const objectifCumule = labels.map((_, index) => objectifJournalier * (index + 1));
     
