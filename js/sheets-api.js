@@ -255,20 +255,37 @@ class SheetsManager {
 
     async getKilometrageData() {
         try {
-            alert('Début de la récupération des données');
+            console.log('Début de la récupération des données');
             await this.ensureAuthenticated();
-            alert('Authentification OK');
+            console.log('Authentification OK');
             
             const response = await gapi.client.sheets.spreadsheets.values.get({
                 spreadsheetId: this.SPREADSHEET_ID,
                 range: 'Feuille 1!A:B',
             });
-            alert('Données reçues de Google Sheets');
+            console.log('Données reçues de Google Sheets:', response.result);
 
-            return response.result.values || [];
+            if (!response.result || !response.result.values) {
+                console.warn('Aucune donnée reçue de Google Sheets');
+                return [];
+            }
+
+            // Filtrer les lignes vides ou invalides
+            const validData = response.result.values.filter(row => {
+                return row && row.length >= 2 && row[0] && row[1];
+            });
+
+            console.log('Données filtrées:', validData);
+            return validData;
         } catch (error) {
-            alert('Erreur: ' + error.message);
+            console.error('Erreur lors de la récupération des données:', {
+                error: error,
+                message: error.message,
+                stack: error.stack
+            });
+            
             if (error.status === 401) {
+                console.log('Erreur d\'authentification, tentative de reconnexion...');
                 await this.handleAuthError();
                 return this.getKilometrageData();
             }
